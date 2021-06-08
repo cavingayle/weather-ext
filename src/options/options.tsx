@@ -18,9 +18,12 @@ import {
 
 } from '../utils/storage'
 
+type FormState = 'ready' | 'saving'
+
 const App: React.FC<{}> = () => {
 
   const [options, setOptions] = useState<LocalStorageOptions | null>(null)
+  const [formState, setFormState] = useState<FormState>('ready')
 
 
   useEffect(() => {
@@ -40,12 +43,21 @@ const App: React.FC<{}> = () => {
 
 
   const handleSaveButtonClick = () => {
+    setFormState('saving')
     setStoredOptions(options)
+      .then(() => {
+        setTimeout(() => {
+          setFormState('ready')
+        }, 1000)
+      
+    })
   }
 
   if (!options) {
     return null
   }
+
+  const isFieldDisabled =  formState === 'saving'
 
   return (
     <Box mx="10%" my="2%">
@@ -57,10 +69,12 @@ const App: React.FC<{}> = () => {
             </Grid>
             <Grid item>
               <Typography variant="body1">Home city name</Typography>
-              <TextField onChange={e => handleHomeCityChange(e.target.value)} value={options.homeCity} fullWidth placeholder="Enter a home city name" />
+              <TextField disabled={isFieldDisabled} onChange={e => handleHomeCityChange(e.target.value)} value={options.homeCity} fullWidth placeholder="Enter a home city name" />
             </Grid>
             <Grid item>
-              <Button color="primary" variant="contained" onClick={handleSaveButtonClick}>save</Button>
+              <Button  disabled={isFieldDisabled} color="primary" variant="contained" onClick={handleSaveButtonClick}>
+                {formState === 'ready' ? "Save" :  'Saving...'}
+              </Button>
             </Grid>
           </Grid>
         </CardContent>
